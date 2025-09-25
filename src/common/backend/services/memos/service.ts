@@ -66,7 +66,7 @@ export default class MemosDocumentService implements DocumentService {
   //   this.UserInfo = MemosUserInfo;
   //   return MemosUserInfo;
   // };
-  // memos验证账号的接口调整
+  // memos验证账号的接口调整，调整
   getUserInfo = async (): Promise<MemosUserInfo> => {
     const response = await this.request.get('v1/auth/sessions/current');
     // 参考接口文档，修改字段解析
@@ -123,4 +123,5 @@ export default class MemosDocumentService implements DocumentService {
     }];
   };
 }
+
 
