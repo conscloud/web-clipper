@@ -16,11 +16,52 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v1
         with:
           node-version: '16.x'
+
       - name: Install Dependencies
         run: npm install --force
-      - run: npm run cov
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Run Coverage
+        run: npm run cov
         env:
           GITHUB_BRANCH: ${{ github.ref }}
+
+      - name: Archive build files
+        run: |
+          mkdir -p dist
+          # 假设你的构建输出在 build 目录，可以根据实际情况修改
+          tar -czvf dist/web-clipper-build.tar.gz build
+
+      - name: Get release version
+        id: get_version
+        run: |
+          # 获取最近的 tag 作为版本号，若没有 tag 则使用 commit hash
+          VERSION=$(git describe --tags --abbrev=0 2>/dev/null || git rev-parse --short HEAD)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        if: github.ref_type == 'tag' || startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: Release ${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload build artifact to release
+        uses: softprops/action-gh-release@v1
+        if: github.ref_type == 'tag' || startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          files: dist/web-clipper-build.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
