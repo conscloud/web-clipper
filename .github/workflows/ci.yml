@@ -25,7 +25,7 @@ jobs:
         run: npm install --force
 
       - name: Build Project
-        run: npm run build
+        run: npm run dev
 
       - name: Run Coverage
         run: npm run cov
